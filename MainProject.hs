@@ -16,41 +16,6 @@ bottomUp cfg input =
   let startingConfig = ([], input) in
   let goalConfig = ([NoBar start], []) in
   parser [shift, reduce] rules startingConfig goalConfig
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- IMPORTANT: Please do not change anything above here.
---            Write all your code below this line.
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
---WARM UPS
-isRuleCNF :: RewriteRule nt t -> Bool
-isRuleCNF = \rule -> case rule of
-                      NTRule lhs rhs -> length rhs == 2
-                      -- NTRule lhs x:[] -> False
-                      -- NTRule lhs [] -> False
-                      -- NTRule lhs x:y:z:rest -> False
-                      TRule lhs rhs -> True
-                      NoRule -> True
-
-isCNF :: CFG nt t -> Bool
-isCNF cfg = 
-  let (nts, ts, i, r) = cfg in
-    and (map (\x -> isRuleCNF x) r)
-
-pathsToGoalFSA :: (Eq st, Eq sy) => ((st,[sy]), [(st,[sy])]) -> [(st,sy,st)] -> [(st,[sy])] -> [[(st,[sy])]]
-
-pathsToGoalFSA (current, history) rules goals =
-  case elem current goals of --is the current configuration one of the goal configurations?
-    True -> [history++[current]] --base case: current configuration is a goal configuration so we should return it along with the history
-    False -> case current of 
-              (curr_state, symbols) -> case null symbols of
-                                        True -> [] --base case: reached a dead-end since we've exhausted the input, so we return an empty list 
-                                        --False -> map (\config -> pathsToGoalFSA ((config, history++[current]) rules goals)) (consumeFSA rules current)
-                                        False -> concatMap (\config -> pathsToGoalFSA (config, history ++ [current]) rules goals) (consumeFSA rules current)
-                                        --recursive case. We still have some input left to process. Use consume FSA to find the list of all possible next steps
-                                        --For each possible next step, call pathsToGoalFSA on that
-                                        --False -> [pathsToGoalFSA (config, history++[current]) rules goals | config <- consumeFSA rules current]
 
 --SHIFT
 -- Applies to nonterminal rules. Look at the RHS of each nonterminal rule. Let n be the length of the RHS array. If the stack does not have at least n elements, 
